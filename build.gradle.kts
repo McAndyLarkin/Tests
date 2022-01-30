@@ -1,6 +1,7 @@
 import org.jetbrains.compose.compose
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import org.apache.tools.ant.taskdefs.condition.Os
 
 plugins {
     kotlin("jvm") version "1.5.31"
@@ -31,6 +32,35 @@ tasks.withType<Jar> {
     }
 }
 
+val nativeBuildDestination = "build_executables"
+val installingScriptsFolder = "InstallingScript"
+
+task("copyBuildArtifacts") {
+    dependsOn("createDistributable")
+        doLast{
+            if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+                copyArtifacts("$installingScriptsFolder/win")
+            } else if (Os.isFamily(Os.FAMILY_MAC)) {
+                copyArtifacts("$installingScriptsFolder/mac")
+            } else {
+                println("Unavailable OS")
+            }
+        }
+}
+
+tasks.build {
+    finalizedBy("copyBuildArtifacts")
+}
+
+fun copyArtifacts(fromPath: String) {
+    copy {
+        println("Copying Build Artifacts")
+        from(fromPath)
+        include("**/*.*")
+        into(layout.buildDirectory.dir("$nativeBuildDestination/main/app/TestsDiploma"))
+    }
+}
+
 compose.desktop {
     application {
         mainClass = "MainKt"
@@ -41,7 +71,7 @@ compose.desktop {
             copyright = "MCAL"
 
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb, TargetFormat.Exe)
-            outputBaseDir.set(project.buildDir.resolve("build_executables"))
+            outputBaseDir.set(project.buildDir.resolve(nativeBuildDestination))
             macOS {
                 iconFile.set(project.file("src/main/resources/icon.icns"))
             }
