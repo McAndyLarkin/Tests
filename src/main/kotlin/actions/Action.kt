@@ -1,6 +1,6 @@
-package Actions
+package actions
 
-import PageType
+import ui.PageType
 
 sealed class Action{
     class OPEN_PAGE(val page: PageType) : Action()

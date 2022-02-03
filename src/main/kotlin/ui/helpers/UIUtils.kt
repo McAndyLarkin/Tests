@@ -1,3 +1,5 @@
+package ui.helpers
+
 import androidx.compose.ui.Alignment
 import kotlin.random.Random
 

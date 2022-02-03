@@ -1,7 +1,6 @@
 package ui
 
-import Actions.ActionManager
-import ScreenState
+import actions.ActionManager
 import TestPage
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.*
@@ -72,16 +71,16 @@ fun CommonContent() {
 
 @Composable
 fun MainContent() {
-    val contentState: MutableState<ScreenState> = remember {
-        mutableStateOf(ScreenState.FEED)
+    val contentState: MutableState<PageType> = remember {
+        mutableStateOf(PageType.FEED)
     }
 
     actionManager = ActionManager(contentState)
 
-    when(val screenState = contentState.value) {
-        ScreenState.FEED -> FeedPage()
-        is ScreenState.TEST -> TestPage(screenState.testId)
-        ScreenState.LOGIN -> LoginPage()
+    when(val pageType = contentState.value) {
+        PageType.FEED -> FeedPage()
+        is PageType.TEST -> TestPage(pageType.id)
+        PageType.LOGIN -> LoginPage()
     }
 }
 
@@ -96,7 +95,7 @@ fun SideBar() {
             alpha = .2f
         )
         Column {
-            Text("123");
+            Text("123")
         }
     }
 }
@@ -172,8 +171,7 @@ fun HeaderBar() {
                                             lines[index].action?.let(actionManager::send)
                                         }
                                     } ?: mod
-                                },
-                                    fontSize = 24.sp, color = color.value)
+                                }, fontSize = 24.sp, color = color.value)
                             }
                         }
                     }

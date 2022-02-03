@@ -1,6 +1,6 @@
 package models
 
-import Actions.Action
+import actions.Action
 
 data class Entity(
     val title: String,

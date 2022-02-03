@@ -1,8 +1,9 @@
 package repositories
 
-import Actions.Action
+import actions.Action
 import models.Entity
 import models.ticket.TicketTopic
+import ui.PageType
 
 class FeedRepository {
     var feed: List<TicketTopic> = listOf(

@@ -1,7 +1,8 @@
 package repositories
 
-import Actions.Action
+import actions.Action
 import models.Entity
+import ui.PageType
 
 class AppRepository {
     val headerContent: List<Entity> by lazy { listOf(

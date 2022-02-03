@@ -1,4 +1,4 @@
-import Actions.Action
+import actions.Action
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.material.Button
@@ -12,6 +12,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import repositories.RepositoryCenter
+import ui.PageType
 import ui.actionManager
 import ui.helpers.RatiosHelper
 
