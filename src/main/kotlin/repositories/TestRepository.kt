@@ -1,9 +1,10 @@
-package test
+package repositories
 
-import test.questions.Question
+import models.test.Test
+import models.test.questions.Question
 
 class TestRepository {
-    private val testList: List<Test> by lazy {
+    val testList: List<Test> by lazy {
         listOf(
             Test("1", "Test1", listOf(
                 Question("where?", listOf("There", "hERE")),

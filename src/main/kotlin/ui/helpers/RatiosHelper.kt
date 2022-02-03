@@ -1,5 +1,4 @@
-import androidx.compose.foundation.shape.GenericShape
-import androidx.compose.ui.graphics.Shape
+package ui.helpers
 
 class RatiosHelper private constructor(
     private val window: Size

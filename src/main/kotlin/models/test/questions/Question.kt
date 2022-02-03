@@ -1,4 +1,4 @@
-package test.questions
+package models.test.questions
 
 data class Question(
     val title: String,

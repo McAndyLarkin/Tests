@@ -1,6 +1,6 @@
-package test
+package models.test
 
-import test.questions.Question
+import models.test.questions.Question
 
 data class Test(
     val testId: String,
