@@ -1,73 +1,152 @@
 import actions.Action
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.selection.selectable
-import androidx.compose.material.Button
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.RadioButton
-import androidx.compose.material.Text
+import androidx.compose.material.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import models.test.Test
+import models.test.questions.Answer
+import models.test.questions.Question
+import repositories.AnswerHolder
 import repositories.RepositoryCenter
 import ui.PageType
 import ui.actionManager
+import ui.helpers.ColorsHelper
 import ui.helpers.RatiosHelper
-
 
 @Composable
 fun TestPage(testId: String) {
     RepositoryCenter.testRepository.findTestById(testId)?.let { test ->
-        Column {
-
-        }
-        Text(test.name)
-        Box(
-            Modifier.fillMaxHeight()
-            .width(RatiosHelper.getMainContentWidth().dp)) {
-            Column {
+        val answers = AnswerHolder.forTest(test)
+        Column(modifier = Modifier.width(RatiosHelper.getMainContentWidth().dp)
+            .padding(start = 220.dp, top = 20.dp, bottom = 20.dp, end = 20.dp)
+            .fillMaxHeight()) {
+            Row(Modifier.fillMaxWidth()) {
+                Header(test)
+                CloseButton()
+            }
+            Column(Modifier.padding(end = 220.dp)) {
                 for (question in test.questions) {
-                    Text("Question: ${question.title}")
-                    Row {
-                        val (selectedOption, onOptionSelected) = remember { mutableStateOf("None") }
-                        question.variants.forEach { text ->
-                            Row(
-                                Modifier.width(300.dp)
-                                    .selectable(
-                                        selected = (text == selectedOption),
-                                        onClick = {
-                                            onOptionSelected(text)
-                                        }
-                                    )
-                                    .padding(horizontal = 16.dp)
-                            ) {
-                                RadioButton(
-                                    selected = (text == selectedOption),
-                                    onClick = {
-                                        onOptionSelected(text)
-                                    }
-                                )
-                                Text(
-                                    text = text,
-                                    style = MaterialTheme.typography.body1.merge(),
-                                    modifier = Modifier.padding(start = 16.dp)
-                                )
-                            }
-                        }
+                    Question(question, answers)
+                }
+                SendButton(answers)
+            }
+        }
+    } ?: Text("Test not found!")
+}
+
+@Composable
+fun Question(question: Question, answerHolder: AnswerHolder) {
+    Text("Question #${question.number}: ${question.title}")
+    Row {
+        when (question.type) {
+            is Question.Type.VARIANTS -> {
+                val onOption = remember { mutableStateOf("none") }
+                question.type.variants.forEach { option ->
+                    Variant(onOption, answerHolder, option, question.number, question.type.poly, null)
+                }
+            }
+            is Question.Type.BINARY -> {
+                val onOption = remember { mutableStateOf("none") }
+                Variant(onOption, answerHolder, question.type.positive, question.number, false, true)
+                Variant(onOption, answerHolder, question.type.negative, question.number, false, false)
+            }
+            is Question.Type.ENTERABLE -> {
+                val onOption = remember { mutableStateOf(TextFieldValue("")) }
+                Enterable(onOption, answerHolder, question.number)
+            }
+        }
+    }
+}
+
+@Composable
+fun Enterable(onOption: MutableState<TextFieldValue>, answerHolder: AnswerHolder, number: Int) {
+    OutlinedTextField(
+        value = onOption.value,
+        onValueChange = { value: TextFieldValue ->
+            val answer = answerHolder.answers[number - 1]
+            if (answer is Answer.EnterableAnswer) {
+                onOption.value = value
+                answer.value = value.text
+            }
+        },
+        modifier = Modifier.width(300.dp), label = { Text("answer") },
+    )
+}
+
+@Composable
+fun Variant(onOption: MutableState<String>, answerHolder: AnswerHolder, variant: String, number: Int, poly: Boolean, binary: Boolean?) {
+    val (option, onSelected) = onOption
+    Row(Modifier.width(300.dp)
+            .selectable(
+                selected = (option == variant),
+                onClick = {
+                    onSelected(variant)
+                    val answer = answerHolder.answers[number-1]
+                    if (answer is Answer.VariantsAnswer) {
+                        answer.value = variant
+                    } else if (answer is Answer.BinaryAnswer) {
+                        answer.value = binary
                     }
                 }
-            }
-            Row(modifier = Modifier.align(Alignment.BottomEnd)) {
-                Button(onClick = ::backToFeed) {
-                    Text("Close")
+            )
+            .padding(horizontal = 16.dp)
+    ) {
+        RadioButton(
+            selected = (option == variant),
+            onClick = {
+                onSelected(variant)
+                val answer = answerHolder.answers[number-1]
+                if (answer is Answer.VariantsAnswer) {
+                    answer.value = variant
+                } else if (answer is Answer.BinaryAnswer) {
+                    answer.value = binary
                 }
-                Button(onClick = ::backToFeed) {
-                    Text("Send Answer")
-                }
             }
+        )
+        Text(text = variant,
+            style = MaterialTheme.typography.body1.merge(),
+            modifier = Modifier.padding(start = 16.dp)
+        )
+    }
+}
+
+@Composable
+fun SendButton(answerHolder: AnswerHolder) {
+    Row(horizontalArrangement = Arrangement.End, modifier = Modifier.width(RatiosHelper.getMainContentWidth().dp)) {
+        Button(onClick = {
+            print("AnswerFinal: "); answerHolder.answers.forEach { print("${it.value}, ") }.let { println() }
+            backToFeed()
+                         }, modifier = Modifier.align(Alignment.Top), colors = ColorsHelper.CLEAN_BUTTON_COLORS) {
+            Text("Send")
         }
+    }
+}
+
+
+@Composable
+fun CloseButton() {
+    Row(horizontalArrangement = Arrangement.End, modifier = Modifier.width(RatiosHelper.getMainContentWidth().dp)) {
+        Button(onClick = ::backToFeed, modifier = Modifier.align(Alignment.Top).size(50.dp), colors = ColorsHelper.CLEAN_BUTTON_COLORS) {
+            Image(painter = painterResource("img1.png"), "Close")
+        }
+    }
+}
+
+@Composable
+fun Header(test: Test) {
+    Column(Modifier.padding(bottom = 20.dp)) {
+        Text(test.name, fontSize = 28.sp, color = ColorsHelper.PASS_TEST_BUTTON)
+        Text("${test.questions.size} Questions", fontSize = 24.sp, color = ColorsHelper.PASS_TEST_BUTTON)
     }
 }
 
@@ -75,4 +154,8 @@ fun backToFeed() {
     actionManager.send(
         Action.OPEN_PAGE(PageType.FEED)
     )
+}
+
+fun sendAnswer(answers: Map<Int, String>) {
+
 }

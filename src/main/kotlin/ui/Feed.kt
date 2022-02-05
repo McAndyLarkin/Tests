@@ -15,8 +15,10 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import models.ticket.TicketTopic
 import repositories.RepositoryCenter
+import ui.helpers.ColorsHelper
 import ui.helpers.RatiosHelper
 import ui.helpers.UIUtils
 
@@ -47,7 +49,8 @@ fun Ticket(ticket: TicketTopic) {
     fun Txt() {
         Text(
             text = ticket.text,
-            style = MaterialTheme.typography.h6.copy(color = Color(.54F, .7F, .7F, 1F)),
+            fontSize = 18.sp,
+            color = Color(.54F, .7F, .7F, 1F),
             textAlign = TextAlign.Start,
             modifier = Modifier.width(600.dp)
         )
@@ -78,13 +81,14 @@ fun Ticket(ticket: TicketTopic) {
 
         Text(
             text = ticket.title,
-            style = MaterialTheme.typography.h4.copy(color = Color(.54F, .65F, .75F, 1F)),
+
+            style = MaterialTheme.typography.h5.copy(color = Color(.54F, .65F, .75F, 1F)),
             textAlign = TextAlign.Start,
         )
         ticket.subtitle?.let {
             Text(
                 text = ticket.subtitle,
-                style = MaterialTheme.typography.h5.copy(color = Color(.54F, .65F, .65F, 1F)),
+                style = MaterialTheme.typography.h6.copy(color = Color(.54F, .65F, .65F, 1F)),
                 textAlign = TextAlign.Start,
             )
         }
@@ -101,9 +105,11 @@ fun Ticket(ticket: TicketTopic) {
                 Img()
             }
         }
-        ticket.button?.let { action ->
-            Button(onClick = { action.action?.let(actionManager::send) }) {
-                Text(action.title)
+        Row(modifier = Modifier.align(Alignment.End).fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+            ticket.button?.let { action ->
+                Button(onClick = { action.action?.let(actionManager::send) }, colors = ColorsHelper.CLEAN_BUTTON_COLORS) {
+                    Text(action.title)
+                }
             }
         }
     }
