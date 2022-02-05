@@ -2,31 +2,41 @@ package actions
 
 import ui.PageType
 import androidx.compose.runtime.MutableState
+import data.delivering.FilesResolver
+import repositories.RepositoryCenter
 
 class ActionManager(private val contentState: MutableState<PageType>) {
     fun send(action: Action) {
         when(action) {
-            is Action.OPEN_PAGE -> openPage(action.page)
-            is Action.OPEN_WEB -> openWeb(action.address)
+            is Action.UI -> processUIAction(action)
+            is Action.INTERNAL -> processInternalAction(action)
+        }
+    }
+
+    private fun processUIAction(action: Action.UI) {
+        when(action) {
+            is Action.UI.OPEN_PAGE -> openPage(action.page)
+            is Action.UI.OPEN_WEB -> openWeb(action.address)
+        }
+    }
+
+    private fun processInternalAction(action: Action.INTERNAL) {
+        when(action) {
+            is Action.INTERNAL.ON_NEW_TEST -> onNewTest(action.testPath)
+            is Action.INTERNAL.ADD_TEST -> RepositoryCenter.testRepository.add(action.test)
         }
     }
 
     private fun openPage(page: PageType) {
-        when (page) {
-            is PageType.TEST -> openTestPage(page.id)
-            PageType.FEED -> openFeedPage()
-        }
-    }
-
-    private fun openTestPage(testId: String) {
-        contentState.value = PageType.TEST(testId)
-    }
-
-    private fun openFeedPage() {
-        contentState.value = PageType.FEED
+        contentState.value = page
     }
 
     private fun openWeb(link: String) {
         println("Open web: $link")
+    }
+
+    private fun onNewTest(path: String) {
+        FilesResolver.getTestFrom(path) { ex , title -> println("$title : ${ex.message}") }
+            ?.let{test -> this.send(Action.INTERNAL.ADD_TEST(test)) }
     }
 }

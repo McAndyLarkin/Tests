@@ -5,4 +5,5 @@ sealed class PageType {
     object FEED : PageType()
     object INFO : PageType()
     object LOGIN : PageType()
+    object ADMIN : PageType()
 }

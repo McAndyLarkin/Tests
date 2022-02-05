@@ -2,6 +2,7 @@ package ui
 
 import actions.ActionManager
 import TestPage
+import actions.Action
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
@@ -14,6 +15,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.awt.ComposeWindow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.PointerEventPass
@@ -35,9 +37,11 @@ import java.awt.Toolkit
 
 lateinit var actionManager: ActionManager
 
+private lateinit var theWindow: MutableState<ComposeWindow>
+
 @Composable
 @Preview
-fun App() {
+private fun App() {
     MaterialTheme {
         CommonContent()
     }
@@ -49,6 +53,7 @@ fun main(args: Array<String>) = application {
         title = LocalizedStrings.instance.APP_NAME,
         onCloseRequest = ::exitApplication, resizable = false) {
         Toolkit.getDefaultToolkit().screenSize.apply {
+            theWindow = remember { mutableStateOf(window) }
             RatiosHelper.updateRatios(
                 height = height,
                 width = width
@@ -59,7 +64,7 @@ fun main(args: Array<String>) = application {
 }
 
 @Composable
-fun CommonContent() {
+private fun CommonContent() {
     Column{
         HeaderBar()
         Row(Modifier.height(RatiosHelper.getUnderHeaderHeight().dp)) {
@@ -70,7 +75,7 @@ fun CommonContent() {
 }
 
 @Composable
-fun MainContent() {
+private fun MainContent() {
     val contentState: MutableState<PageType> = remember {
         mutableStateOf(PageType.FEED)
     }
@@ -81,11 +86,12 @@ fun MainContent() {
         PageType.FEED -> FeedPage()
         is PageType.TEST -> TestPage(pageType.id)
         PageType.LOGIN -> LoginPage()
+        PageType.ADMIN -> AdminPage(theWindow.value)
     }
 }
 
 @Composable
-fun SideBar() {
+private fun SideBar() {
     Box(Modifier.fillMaxHeight().width(RatiosHelper.getSideBarWidth().dp)) {
         Image(
             painter = painterResource("back.jpeg"),
@@ -96,13 +102,18 @@ fun SideBar() {
         )
         Column {
             Text("123")
+            Button(onClick = {
+                actionManager.send(Action.UI.OPEN_PAGE(PageType.ADMIN))
+            }) {
+                Text("Admin")
+            }
         }
     }
 }
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun HeaderBar() {
+private fun HeaderBar() {
     Surface(Modifier
         .fillMaxWidth()
         .height(RatiosHelper.getHeaderHeight().dp)) {

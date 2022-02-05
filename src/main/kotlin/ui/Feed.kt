@@ -16,11 +16,12 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import models.ticket.TicketTopic
+import ui.viewmodels.ticket.TicketTopic
 import repositories.RepositoryCenter
 import ui.helpers.ColorsHelper
 import ui.helpers.RatiosHelper
 import ui.helpers.UIUtils
+import ui.viewmodels.ticket.TicketMapper
 
 
 @Composable
@@ -34,7 +35,8 @@ fun FeedPage() {
             .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally){
 
-            RepositoryCenter.feedRepository.feed.let { content ->
+            RepositoryCenter.testRepository.getTests()
+                .map(TicketMapper::fromTest).let { content ->
                 for (topic in content) {
                     Ticket(topic)
                 }
@@ -44,7 +46,7 @@ fun FeedPage() {
 }
 
 @Composable
-fun Ticket(ticket: TicketTopic) {
+private fun Ticket(ticket: TicketTopic) {
     @Composable
     fun Txt() {
         Text(

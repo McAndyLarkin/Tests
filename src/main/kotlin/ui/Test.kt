@@ -1,5 +1,3 @@
-import actions.Action
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.material.*
@@ -9,7 +7,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -18,8 +15,8 @@ import models.test.questions.Answer
 import models.test.questions.Question
 import repositories.AnswerHolder
 import repositories.RepositoryCenter
-import ui.PageType
-import ui.actionManager
+import ui.CloseButton
+import ui.backToFeed
 import ui.helpers.ColorsHelper
 import ui.helpers.RatiosHelper
 
@@ -45,7 +42,7 @@ fun TestPage(testId: String) {
 }
 
 @Composable
-fun Question(question: Question, answerHolder: AnswerHolder) {
+private fun Question(question: Question, answerHolder: AnswerHolder) {
     Text("Question #${question.number}: ${question.title}")
     Row {
         when (question.type) {
@@ -69,7 +66,7 @@ fun Question(question: Question, answerHolder: AnswerHolder) {
 }
 
 @Composable
-fun Enterable(onOption: MutableState<TextFieldValue>, answerHolder: AnswerHolder, number: Int) {
+private fun Enterable(onOption: MutableState<TextFieldValue>, answerHolder: AnswerHolder, number: Int) {
     OutlinedTextField(
         value = onOption.value,
         onValueChange = { value: TextFieldValue ->
@@ -84,7 +81,7 @@ fun Enterable(onOption: MutableState<TextFieldValue>, answerHolder: AnswerHolder
 }
 
 @Composable
-fun Variant(onOption: MutableState<String>, answerHolder: AnswerHolder, variant: String, number: Int, poly: Boolean, binary: Boolean?) {
+private fun Variant(onOption: MutableState<String>, answerHolder: AnswerHolder, variant: String, number: Int, poly: Boolean, binary: Boolean?) {
     val (option, onSelected) = onOption
     Row(Modifier.width(300.dp)
             .selectable(
@@ -121,7 +118,7 @@ fun Variant(onOption: MutableState<String>, answerHolder: AnswerHolder, variant:
 }
 
 @Composable
-fun SendButton(answerHolder: AnswerHolder) {
+private fun SendButton(answerHolder: AnswerHolder) {
     Row(horizontalArrangement = Arrangement.End, modifier = Modifier.width(RatiosHelper.getMainContentWidth().dp)) {
         Button(onClick = {
             print("AnswerFinal: "); answerHolder.answers.forEach { print("${it.value}, ") }.let { println() }
@@ -132,30 +129,15 @@ fun SendButton(answerHolder: AnswerHolder) {
     }
 }
 
-
 @Composable
-fun CloseButton() {
-    Row(horizontalArrangement = Arrangement.End, modifier = Modifier.width(RatiosHelper.getMainContentWidth().dp)) {
-        Button(onClick = ::backToFeed, modifier = Modifier.align(Alignment.Top).size(50.dp), colors = ColorsHelper.CLEAN_BUTTON_COLORS) {
-            Image(painter = painterResource("img1.png"), "Close")
-        }
-    }
-}
-
-@Composable
-fun Header(test: Test) {
+private fun Header(test: Test) {
     Column(Modifier.padding(bottom = 20.dp)) {
         Text(test.name, fontSize = 28.sp, color = ColorsHelper.PASS_TEST_BUTTON)
         Text("${test.questions.size} Questions", fontSize = 24.sp, color = ColorsHelper.PASS_TEST_BUTTON)
+        Text(test.description, fontSize = 20.sp, color = ColorsHelper.PASS_TEST_BUTTON)
     }
 }
 
-fun backToFeed() {
-    actionManager.send(
-        Action.OPEN_PAGE(PageType.FEED)
-    )
-}
-
-fun sendAnswer(answers: Map<Int, String>) {
+private fun sendAnswer(answers: Map<Int, String>) {
 
 }

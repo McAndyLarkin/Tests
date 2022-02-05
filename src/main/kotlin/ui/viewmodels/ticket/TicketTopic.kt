@@ -1,4 +1,4 @@
-package models.ticket
+package ui.viewmodels.ticket
 
 import models.Entity
 
