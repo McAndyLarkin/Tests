@@ -1,12 +1,16 @@
 package data.delivering
 
 import models.test.Test
-import models.test.questions.Answer
+import models.test.answers.Answer
+import models.test.answers.AnswersSet
 
 interface DataDeliveringService {
     fun addTest(test: Test)
     val tests: List<Test>
 
-    fun addAnswer(answer: Answer<*>)
-    val answers: List<Answer<*>>
+    fun addAnswer(answers: AnswersSet)
+
+    fun login(login: String, password: String): Boolean
+
+    val answers: List<AnswersSet>
 }

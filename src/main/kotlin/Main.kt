@@ -1,7 +1,4 @@
-package ui
-
 import actions.ActionManager
-import TestPage
 import actions.Action
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.*
@@ -30,11 +27,13 @@ import androidx.compose.ui.window.WindowPlacement
 import androidx.compose.ui.window.WindowState
 import androidx.compose.ui.window.application
 import localization.LocalizedStrings
-import repositories.RepositoryCenter
+import models.User
+import repositories.SingletonCenter
+import ui.*
 import ui.helpers.ColorsHelper
 import ui.helpers.RatiosHelper
+import ui.viewmodels.ticket.AnswersPage
 import java.awt.Toolkit
-
 lateinit var actionManager: ActionManager
 
 private lateinit var theWindow: MutableState<ComposeWindow>
@@ -83,10 +82,12 @@ private fun MainContent() {
     actionManager = ActionManager(contentState)
 
     when(val pageType = contentState.value) {
-        PageType.FEED -> FeedPage()
         is PageType.TEST -> TestPage(pageType.id)
+        is PageType.STATISTIC -> StatisticPage(pageType.testId)
+        PageType.FEED -> FeedPage()
         PageType.LOGIN -> LoginPage()
         PageType.ADMIN -> AdminPage(theWindow.value)
+        PageType.ANSWERS -> AnswersPage()
     }
 }
 
@@ -100,10 +101,14 @@ private fun SideBar() {
             contentScale = ContentScale.Crop,
             alpha = .2f
         )
-        Column {
+        Column (Modifier.padding(10.dp)) {
             Text("123")
             Button(onClick = {
-                actionManager.send(Action.UI.OPEN_PAGE(PageType.ADMIN))
+                if (SingletonCenter.authRepository.user == User.Companion.ADMIN) {
+                    actionManager.send(Action.UI.OPEN_PAGE(PageType.ADMIN))
+                } else {
+                    actionManager.send(Action.UI.OPEN_PAGE(PageType.LOGIN))
+                }
             }) {
                 Text("Admin")
             }
@@ -166,9 +171,9 @@ private fun HeaderBar() {
                     }.background(color = Color(1f, 1f, 1f, .7f))
                 ) {
                     Column(Modifier.padding(20.dp)) {
-                        RepositoryCenter.appRepository.headerContent.let { lines ->
+                        SingletonCenter.appRepository.headerContent.let { lines ->
                             for (index in lines.indices) {
-                                RepositoryCenter.appRepository.headerContent
+                                SingletonCenter.appRepository.headerContent
                                 val color = remember{mutableStateOf(ColorsHelper.HEADER_LINES)}
                                 Text(lines[index].title, Modifier.offset(x = 30.dp + (index * 40).dp).let { mod ->
                                     lines[index].action?.let {

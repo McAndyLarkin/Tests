@@ -7,6 +7,7 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.graphics.Color
 
 object ColorsHelper {
+    val QUESTION_HEADER = Color(0xFF107344)
     val HEADER_LINES = Color(.5f,.7f,.9f,.9f)
     val HEADER_LINES_FOCUS = Color(.3f,.3f,1f,1f)
 

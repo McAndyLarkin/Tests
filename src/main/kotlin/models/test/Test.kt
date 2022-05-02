@@ -5,7 +5,7 @@ import models.test.questions.Question
 data class Test(
     val testId: String,
     val name: String,
-    val subtitle: String,
+    val subtitle: String?,
     val description: String,
     val questions: List<Question>
 ) {

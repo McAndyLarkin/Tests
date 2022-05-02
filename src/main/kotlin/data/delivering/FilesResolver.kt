@@ -25,7 +25,7 @@ object FilesResolver {
 
                 val name = testObject["name"] as String
                 val testId = UUID.randomUUID().toString()
-                val subtitle = testObject["subtitle"] as String
+                val subtitle = testObject["subtitle"] as String?
                 val description = testObject["description"] as String
 
                 val questions = mutableListOf<Question>()
@@ -56,6 +56,7 @@ object FilesResolver {
             return null
         } catch (e: Exception) {
             onErrorAction?.let {
+                e.printStackTrace()
                 onErrorAction(e, "Unknown issue")
             }
             return null
@@ -110,7 +111,7 @@ object FilesResolver {
                             }
                         }
                     },
-                    (typeObj["poly"] as String).toBoolean()
+                    typeObj["poly"] as Boolean
                 )
             }
             Question.Type.ENTERABLE::class.java.simpleName -> {

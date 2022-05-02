@@ -21,9 +21,6 @@ dependencies {
     implementation(compose.desktop.currentOs)
     implementation(kotlin("stdlib-jdk8"))
 
-    //Firebase
-    implementation ("com.google.firebase:firebase-admin:8.1.0")
-
     //JSon
     implementation("com.googlecode.json-simple:json-simple:1.1.1")
 

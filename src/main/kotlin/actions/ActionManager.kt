@@ -3,7 +3,7 @@ package actions
 import ui.PageType
 import androidx.compose.runtime.MutableState
 import data.delivering.FilesResolver
-import repositories.RepositoryCenter
+import repositories.SingletonCenter
 
 class ActionManager(private val contentState: MutableState<PageType>) {
     fun send(action: Action) {
@@ -23,7 +23,9 @@ class ActionManager(private val contentState: MutableState<PageType>) {
     private fun processInternalAction(action: Action.INTERNAL) {
         when(action) {
             is Action.INTERNAL.ON_NEW_TEST -> onNewTest(action.testPath)
-            is Action.INTERNAL.ADD_TEST -> RepositoryCenter.testRepository.add(action.test)
+            is Action.INTERNAL.ADD_TEST -> SingletonCenter.testRepository.add(action.test)
+            is Action.INTERNAL.ADD_ANSWER -> SingletonCenter.answerRepository.add(action.answers)
+            is Action.INTERNAL.LOG_IN -> SingletonCenter.authRepository.logIn(action.login, action.password)
         }
     }
 

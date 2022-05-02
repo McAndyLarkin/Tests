@@ -1,7 +1,7 @@
 package repositories
 
 import models.test.Test
-import models.test.questions.Answer
+import models.test.answers.Answer
 import models.test.questions.Question
 
 class AnswerHolder private constructor(val answers: MutableList<Answer<*>>) {

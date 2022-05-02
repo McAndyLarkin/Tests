@@ -1,5 +1,6 @@
 package ui
 
+import actionManager
 import actions.Action
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Button
@@ -20,8 +21,11 @@ fun AdminPage(window: ComposeWindow) {
             Header()
             CloseButton()
         }
-        Button(onClick = { addTestDialog(window) } ) {
+        Button(onClick = { addTestDialog(window) }, modifier = Modifier.padding(bottom = 20.dp)) {
             Text("Add Tests")
+        }
+        Button(onClick = { actionManager.send(Action.UI.OPEN_PAGE(page = PageType.ANSWERS)) } ) {
+            Text("Answers")
         }
     }
 }

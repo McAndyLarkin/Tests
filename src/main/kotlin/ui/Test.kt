@@ -1,5 +1,8 @@
+import actions.Action
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
@@ -10,11 +13,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import localization.LocalizedStrings
 import models.test.Test
-import models.test.questions.Answer
+import models.test.answers.Answer
+import models.test.answers.AnswersSet
 import models.test.questions.Question
 import repositories.AnswerHolder
-import repositories.RepositoryCenter
+import repositories.SingletonCenter
 import ui.CloseButton
 import ui.backToFeed
 import ui.helpers.ColorsHelper
@@ -22,7 +27,7 @@ import ui.helpers.RatiosHelper
 
 @Composable
 fun TestPage(testId: String) {
-    RepositoryCenter.testRepository.findTestById(testId)?.let { test ->
+    SingletonCenter.testRepository.findTestById(testId)?.let { test ->
         val answers = AnswerHolder.forTest(test)
         Column(modifier = Modifier.width(RatiosHelper.getMainContentWidth().dp)
             .padding(start = 220.dp, top = 20.dp, bottom = 20.dp, end = 20.dp)
@@ -31,11 +36,12 @@ fun TestPage(testId: String) {
                 Header(test)
                 CloseButton()
             }
-            Column(Modifier.padding(end = 220.dp)) {
+            Column(Modifier.padding(end = 220.dp)
+                .verticalScroll(rememberScrollState())) {
                 for (question in test.questions) {
                     Question(question, answers)
                 }
-                SendButton(answers)
+                SendButton(answers, testId)
             }
         }
     } ?: Text("Test not found!")
@@ -43,7 +49,8 @@ fun TestPage(testId: String) {
 
 @Composable
 private fun Question(question: Question, answerHolder: AnswerHolder) {
-    Text("Question #${question.number}: ${question.title}")
+    Text("Question #${question.number}: ${question.title}",
+        Modifier.padding(top = 10.dp), color = ColorsHelper.QUESTION_HEADER)
     Row {
         when (question.type) {
             is Question.Type.VARIANTS -> {
@@ -112,16 +119,17 @@ private fun Variant(onOption: MutableState<String>, answerHolder: AnswerHolder, 
         )
         Text(text = variant,
             style = MaterialTheme.typography.body1.merge(),
-            modifier = Modifier.padding(start = 16.dp)
+            modifier = Modifier.padding(start = 16.dp).align(Alignment.CenterVertically)
         )
     }
 }
 
 @Composable
-private fun SendButton(answerHolder: AnswerHolder) {
+private fun SendButton(answerHolder: AnswerHolder, testId: String) {
     Row(horizontalArrangement = Arrangement.End, modifier = Modifier.width(RatiosHelper.getMainContentWidth().dp)) {
         Button(onClick = {
             print("AnswerFinal: "); answerHolder.answers.forEach { print("${it.value}, ") }.let { println() }
+            sendAnswer(answerHolder.answers, testId)
             backToFeed()
                          }, modifier = Modifier.align(Alignment.Top), colors = ColorsHelper.CLEAN_BUTTON_COLORS) {
             Text("Send")
@@ -133,11 +141,13 @@ private fun SendButton(answerHolder: AnswerHolder) {
 private fun Header(test: Test) {
     Column(Modifier.padding(bottom = 20.dp)) {
         Text(test.name, fontSize = 28.sp, color = ColorsHelper.PASS_TEST_BUTTON)
-        Text("${test.questions.size} Questions", fontSize = 24.sp, color = ColorsHelper.PASS_TEST_BUTTON)
+        Text("${test.questions.size} ${LocalizedStrings.instance.QUESTIONS_POSTFIX}", fontSize = 24.sp, color = ColorsHelper.PASS_TEST_BUTTON)
         Text(test.description, fontSize = 20.sp, color = ColorsHelper.PASS_TEST_BUTTON)
     }
 }
 
-private fun sendAnswer(answers: Map<Int, String>) {
-
+private fun sendAnswer(answers: List<Answer<*>>, testId: String) {
+    actionManager.send(Action.INTERNAL.ADD_ANSWER(AnswersSet(
+        testId, null, SingletonCenter.authRepository.user.userId, answers
+    )))
 }

@@ -1,0 +1,41 @@
+{
+  "name": "New test",
+  "subtitle": "the test should be added successeful",
+  "description": "The original test",
+  "questions": [
+    {
+      "number": 1,
+      "title": "What is your name?",
+      "type": {
+        "name": "ENTERABLE",
+        "rightAnswer": "null"
+      }
+    },
+    {
+      "number": 2,
+      "title": "What is your sex?",
+      "type": {
+        "name": "BINARY",
+        "rightAnswer": "null",
+        "positive": "Female",
+        "negative": "Male"
+      }
+    },
+    {
+      "number": 3,
+      "title": "Choose your country:",
+      "type": {
+        "name": "VARIANTS",
+        "rightAnswer": "null",
+        "poly": false,
+        "variants": [
+          "Russia",
+          "USA",
+          "England",
+          "Ukraine"
+        ]
+      }
+    }
+  ],
+  "testId": "32ed22ae-cff4-48c5-a404-fc6e485a7aa9"
+}

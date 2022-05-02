@@ -4,6 +4,7 @@ import java.util.*
 
 interface LocalizedStrings {
     val APP_NAME: String
+    val QUESTIONS_POSTFIX: String
 
     companion object {
         private val rus by lazy { RussianLocalizedStrings() }
