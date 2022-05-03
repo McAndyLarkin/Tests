@@ -51,6 +51,7 @@ fun AnswersSet.toMap() = mapOf(
                     is Answer.BinaryAnswer -> "Binary"
                     is Answer.EnterableAnswer -> "Enter"
                     is Answer.VariantsAnswer -> "Variant"
+                    is Answer.NumEnterableAnswer -> "NumEnter"
                     else -> "?"
                 },
                 "number" to i+1,
@@ -109,6 +110,14 @@ fun Map<*, *>.toAnswer() = AnswersSet(
                                 .let { if (it == "null") null
                                 else it}
                 }
+
+                "NumEnter" -> Answer.NumEnterableAnswer().apply {
+                    value = answer["value"]
+                        ?.let { it as String }
+                        .let { if (it == "null") null
+                        else it?.toDouble()}
+                }
+
                 else -> throw Exception("It no compatable AnswerType")
             }
         }
@@ -139,6 +148,9 @@ private fun getQuestionTypeFrom(typeObj: JSONObject): Question.Type<*> {
         }
         Question.Type.ENTERABLE::class.java.simpleName -> {
             Question.Type.ENTERABLE()
+        }
+        Question.Type.NUM_ENTERABLE::class.java.simpleName -> {
+            Question.Type.NUM_ENTERABLE()
         }
         else -> {
             val rightAnswer = typeObj["rightAnswer"]

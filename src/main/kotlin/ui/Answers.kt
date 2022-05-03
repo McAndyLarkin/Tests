@@ -2,7 +2,6 @@ package ui.viewmodels.ticket
 
 import actionManager
 import actions.Action
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -10,7 +9,6 @@ import androidx.compose.material.Button
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import models.User
@@ -21,6 +19,7 @@ import ui.CloseButton
 import ui.PageType
 import ui.helpers.ColorsHelper
 import ui.helpers.RatiosHelper
+import kotlin.math.round
 
 @Composable
 fun AnswersPage() {
@@ -72,7 +71,7 @@ private fun Header() {
     }
 }
 
-fun getAnswerVal(question: Question, answer: Answer<*>) =
+fun getAnswerVal(question: Question, answer: Answer<*>): String =
     if (question.type is Question.Type.BINARY
         && answer is Answer.BinaryAnswer) {
         answer.value?.let { ans ->
@@ -85,4 +84,6 @@ fun getAnswerVal(question: Question, answer: Answer<*>) =
     }else if (question.type is Question.Type.VARIANTS
         && answer is Answer.VariantsAnswer) {
         answer.value ?: "Did not answered"
+    } else if (question.type is Question.Type.NUM_ENTERABLE && answer is Answer.NumEnterableAnswer) {
+        answer.value?.toString()?.let { it.substring(0, it.length.coerceAtMost(8)) } ?: "Did not answered"
     } else "Data destroyed"

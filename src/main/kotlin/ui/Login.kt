@@ -19,12 +19,8 @@ import ui.helpers.RatiosHelper
 fun LoginPage() {
     val onLoginValue = remember { mutableStateOf(TextFieldValue("")) }
     val onPasswordValue = remember { mutableStateOf(TextFieldValue("")) }
-    Row(Modifier.fillMaxWidth()) {
-        Column(
-            Modifier.fillMaxHeight()
-                .width(RatiosHelper.getMainContentWidth().dp)
-                .padding(20.dp)
-        ) {
+    Row(Modifier.width(RatiosHelper.getMainContentWidth().dp).padding(20.dp)) {
+        Column {
             OutlinedTextField(
                 value = onLoginValue.value,
                 onValueChange = { value: TextFieldValue ->

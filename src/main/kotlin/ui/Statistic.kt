@@ -4,7 +4,6 @@ import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
@@ -20,6 +19,7 @@ import org.jetbrains.skia.Paint
 import org.jetbrains.skia.TextLine
 import org.jetbrains.skia.Typeface
 import repositories.SingletonCenter
+import ui.helpers.ColorsHelper
 import ui.helpers.RatiosHelper
 import ui.viewmodels.ticket.getAnswerVal
 import kotlin.math.ceil
@@ -28,10 +28,13 @@ const val columns = 5
 
 @Composable
 fun StatisticPage(testId: String) {
-    Column(Modifier.width(RatiosHelper.getMainContentWidth().dp)) {
+    Column(Modifier.width(RatiosHelper.getMainContentWidth().dp).padding(20.dp)) {
         SingletonCenter.testRepository.findTestById(testId)?.let { test ->
-            Row(Modifier.padding(5.dp)) {
-                Text("Test: ${test.name}.", fontSize = 22.sp)
+            Row(Modifier) {
+                Column {
+                    Header()
+                    Text("Test: ${test.name}.", fontSize = 22.sp)
+                }
                 CloseButton()
             }
             SingletonCenter.answerRepository.findAnswersByTestId(testId).let { answerSets ->
@@ -69,15 +72,21 @@ private fun StatistCeil(question: Question, answers: List<Answer<*>>) {
         .border(4.dp, Color(.97f,1f, 1f, 1f))
         .padding(10.dp)) {
         Text(question.title, softWrap = true, color = Color.Magenta)
-        val grouped = answers
+        val grouped_by_count = answers
             .groupBy(Answer<*>::value)
             .entries.toList()
             .filter { entry -> entry.key != null }
-        if (grouped.isNotEmpty()) {
+        if (grouped_by_count.isNotEmpty()) {
             val size = DpSize((ceilHeight * 0.4).dp, (ceilHeight * 0.4).dp)
-            if (question.type is Question.Type.VARIANTS) {
-                val most = grouped.maxByOrNull { it.value.size }!!
-                val least = grouped.minByOrNull { it.value.size }!!
+            if (grouped_by_count.size == 1) {
+                Text(
+                    "The only answer provided: ${
+                        getAnswerVal(question, grouped_by_count.first().value.first())
+                    }", softWrap = true
+                )
+            } else if (question.type is Question.Type.VARIANTS) {
+                val most = grouped_by_count.maxByOrNull { it.value.size }!!
+                val least = grouped_by_count.minByOrNull { it.value.size }!!
                 Text(
                     "The most popular: ${
                         getAnswerVal(question, most.value.first())
@@ -88,11 +97,11 @@ private fun StatistCeil(question: Question, answers: List<Answer<*>>) {
                         getAnswerVal(question, least.value.first())
                     }; ${"%.2f".format((least.value.size / answers.size.toDouble()) * 100)}%; ${least.value.size} pcs", softWrap = true
                 )
-                Spacer(modifier = Modifier.height(20.dp))
-                drawPlot(grouped.map { Pair(getAnswerVal(question, it.value.first()), it.value) }, size = size)
+                Spacer(modifier = Modifier.height(25.dp))
+                drawPlot(grouped_by_count.map { Pair(getAnswerVal(question, it.value.first()), it.value.size.toDouble()) }, size = size, true)
             } else if (question.type is Question.Type.BINARY) {
-                val most = grouped.maxByOrNull { it.value.size }!!
-                val least = grouped.minByOrNull { it.value.size }!!
+                val most = grouped_by_count.maxByOrNull { it.value.size }!!
+                val least = grouped_by_count.minByOrNull { it.value.size }!!
                 if (most.value.size != least.value.size) {
                     Text(
                         "Answer '${
@@ -101,8 +110,8 @@ private fun StatistCeil(question: Question, answers: List<Answer<*>>) {
                             getAnswerVal(question, least.value.first())
                         }' (${least.value.size} pcs)", softWrap = true
                     )
-                    Spacer(modifier = Modifier.height(20.dp))
-                    drawDia(grouped.map { Pair(getAnswerVal(question, it.value.first()), it.value) }, size = size)
+                    Spacer(modifier = Modifier.height(25.dp))
+                    drawDia(grouped_by_count.map { Pair(getAnswerVal(question, it.value.first()), it.value.size.toDouble()) }, size = size)
                 } else {
                     Text(
                         "Answers '${question.type.positive}' and '${question.type.negative}' " +
@@ -110,7 +119,7 @@ private fun StatistCeil(question: Question, answers: List<Answer<*>>) {
                     )
                 }
             } else if (question.type is Question.Type.ENTERABLE) {
-                grouped.forEach { answer ->
+                grouped_by_count.forEach { answer ->
                     Text(
                         "* ${
                             getAnswerVal(question, answer.value.first())
@@ -118,6 +127,32 @@ private fun StatistCeil(question: Question, answers: List<Answer<*>>) {
                         softWrap = true
                     )
                 }
+            } else if (question.type is Question.Type.NUM_ENTERABLE ) {
+                val double_answer = answers.filter { it.value is Double }.map { it as Answer<Double> }
+                val max = double_answer.maxByOrNull { it.value ?: 0.0 }
+                val min = double_answer.minByOrNull { it.value ?: 0.0 }
+                val average = (double_answer.sumOf { it.value ?: 0.0 } / double_answer.size.toDouble())
+                    .toString().let { it.substring(0, it.length.coerceAtMost(8)) }
+                val median: String? = double_answer.sortedBy { it.value ?: 0.0 }.let {
+                    if (it.size % 2 != 0) {
+                        it[double_answer.size / 2].value
+                    } else if (double_answer.isNotEmpty()) {
+                        val left = it[(double_answer.size / 2) - 1].value
+                        val right = it[double_answer.size / 2].value
+                        if (left != null && right != null) (left + right) / 2.0
+                        else left ?: right
+                    } else null
+                }?.toString()?.let { it.substring(0, it.length.coerceAtMost(8)) }
+
+                Text("The biggest answer: ${max?.value ?: "Undefined"}", softWrap = true)
+                Text("The smallest answer: ${min?.value ?: "Undefined"}", softWrap = true)
+                Text("Average: $average", softWrap = true)
+                Text("Median: ${median ?: "Undefined"}", softWrap = true)
+                Spacer(modifier = Modifier.height(25.dp))
+                drawPlot(double_answer.map {
+                    println("v - ${it.value}")
+                    Pair(it.value!!.toString().let { it.substring(0, it.length.coerceAtMost(8)) }, it.value!!)
+                }, size = size, false)
             }
         } else {
             Text("There is not answers for the question", softWrap = true)
@@ -126,21 +161,22 @@ private fun StatistCeil(question: Question, answers: List<Answer<*>>) {
 }
 
 @Composable
-fun drawPlot(grouped: List<Pair<String, List<Answer<*>>>>, size: DpSize) {
+fun drawPlot(grouped: List<Pair<String?, Double>>, size: DpSize, shallSpecify: Boolean) {
     Canvas(modifier = Modifier.size(size = size)) {
         val canvasWidth = size.width
         val canvasHeight = size.height
 
-        val max = grouped.maxByOrNull { it.second.size }!!
+        val max = grouped.maxByOrNull { it.second }!!
 
         val segment_w = canvasWidth / (grouped.size - 1)
         val segment_h = canvasHeight / (grouped.size - 1)
         for (group_i in grouped.indices) {
-            val h = (canvasHeight * (grouped[group_i].second.size / max.second.size.toFloat()))
+            val h = (canvasHeight * (grouped[group_i].second / max.second).toFloat())
             drawCircle(Color.Red,10f, center = Offset(x = (segment_w * group_i).toPx(),
                 y = (canvasHeight - h).toPx()))
             drawContext.canvas.nativeCanvas.apply {
-                drawTextLine(line = TextLine.Companion.make("${grouped[group_i].first}: ${grouped[group_i].second.size}", Font(Typeface.makeDefault(), 26f)),
+                drawTextLine(line = TextLine.Companion.make(if (shallSpecify) "${grouped[group_i].first}: ${grouped[group_i].second}"
+                    else grouped[group_i].first, Font(Typeface.makeDefault(), 26f)),
                     paint = Paint().apply {
                         this.strokeWidth = 10f
                     }, x = (segment_w * group_i).toPx(), y = (canvasHeight-h).toPx())
@@ -166,33 +202,33 @@ fun drawPlot(grouped: List<Pair<String, List<Answer<*>>>>, size: DpSize) {
     }
 }
 @Composable
-fun drawDia(grouped: List<Pair<String, List<Answer<*>>>>, size: DpSize) {
+fun drawDia(grouped: List<Pair<String?, Double>>, size: DpSize) {
     Canvas(modifier = Modifier.size(size = size)) {
         val canvasWidth = size.width
         val canvasHeight = size.height
 
-        val max = grouped.maxByOrNull { it.second.size }!!
+        val max = grouped.maxByOrNull { it.second }!!
 
         val segment_w = canvasWidth / (grouped.size)
         val segment_h = canvasHeight / (grouped.size)
         var a = false;
         for (group_i in grouped.indices) {
-            val h = (canvasHeight * (grouped[group_i].second.size / max.second.size.toFloat()))
+            val h = (canvasHeight * (grouped[group_i].second / max.second).toFloat())
             drawRect((if (a) Color.Red else Color.Yellow),
                 Offset(x = (segment_w * group_i).toPx(), y = (canvasHeight - h).toPx()),
                 Size(segment_w.toPx(), (h).toPx())
             )
             drawContext.canvas.nativeCanvas.apply {
-                drawTextLine(line = TextLine.Companion.make(grouped[group_i].second.size.toString(), Font(Typeface.makeDefault(), 34f)),
+                drawTextLine(line = TextLine.Companion.make(grouped[group_i].second.toString(), Font(Typeface.makeDefault(), 34f)),
                     paint = Paint().apply {
                         this.strokeWidth = 10f
-                    }, x = (segment_w * group_i).toPx(), y = (canvasHeight-h).toPx())
+                    }, x = (segment_w * group_i + 5.dp).toPx(), y = (canvasHeight-h-5.dp).toPx())
             }
             drawContext.canvas.nativeCanvas.apply {
                 drawTextLine(line = TextLine.Companion.make(grouped[group_i].first, Font(Typeface.makeDefault(), 34f)),
                     paint = Paint().apply {
                         this.strokeWidth = 10f
-                    }, x = (segment_w * group_i).toPx(), y = canvasHeight.toPx() + 35f)
+                    }, x = (segment_w * group_i + 5.dp).toPx(), y = canvasHeight.toPx() + 35f)
             }
             a = a.not()
         }
@@ -213,5 +249,14 @@ fun drawDia(grouped: List<Pair<String, List<Answer<*>>>>, size: DpSize) {
             strokeWidth = 5F
         )
 
+    }
+}
+
+
+
+@Composable
+private fun Header() {
+    Column(Modifier.padding(bottom = 20.dp)) {
+        Text("Statistic", fontSize = 28.sp, color = ColorsHelper.PASS_TEST_BUTTON)
     }
 }

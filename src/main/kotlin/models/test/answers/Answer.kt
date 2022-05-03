@@ -6,6 +6,7 @@ open class Answer<T> {
     class BinaryAnswer : Answer<Boolean>()
     class VariantsAnswer : Answer<String>()
     class EnterableAnswer : Answer<String>()
+    class NumEnterableAnswer : Answer<Double>()
 
     override fun toString(): String {
         return "Answer[$value] ${javaClass.simpleName}"

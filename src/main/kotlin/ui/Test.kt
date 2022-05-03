@@ -10,6 +10,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -24,6 +26,7 @@ import ui.CloseButton
 import ui.backToFeed
 import ui.helpers.ColorsHelper
 import ui.helpers.RatiosHelper
+
 
 @Composable
 fun TestPage(testId: String) {
@@ -41,7 +44,9 @@ fun TestPage(testId: String) {
                 for (question in test.questions) {
                     Question(question, answers)
                 }
-                SendButton(answers, testId)
+                Row {
+                    SendButton(answers, testId)
+                }
             }
         }
     } ?: Text("Test not found!")
@@ -55,8 +60,10 @@ private fun Question(question: Question, answerHolder: AnswerHolder) {
         when (question.type) {
             is Question.Type.VARIANTS -> {
                 val onOption = remember { mutableStateOf("none") }
-                question.type.variants.forEach { option ->
-                    Variant(onOption, answerHolder, option, question.number, question.type.poly, null)
+                Column {
+                    question.type.variants.forEach { option ->
+                        Variant(onOption, answerHolder, option, question.number, question.type.poly, null)
+                    }
                 }
             }
             is Question.Type.BINARY -> {
@@ -66,24 +73,54 @@ private fun Question(question: Question, answerHolder: AnswerHolder) {
             }
             is Question.Type.ENTERABLE -> {
                 val onOption = remember { mutableStateOf(TextFieldValue("")) }
-                Enterable(onOption, answerHolder, question.number)
+                Enterable(onOption, answerHolder, question.number, false)
+            }
+            is Question.Type.NUM_ENTERABLE -> {
+                val onOption = remember { mutableStateOf(TextFieldValue("")) }
+                Enterable(onOption, answerHolder, question.number, true)
             }
         }
     }
 }
 
 @Composable
-private fun Enterable(onOption: MutableState<TextFieldValue>, answerHolder: AnswerHolder, number: Int) {
+private fun Enterable(onOption: MutableState<TextFieldValue>, answerHolder: AnswerHolder, number: Int, onlyDigits: Boolean) {
     OutlinedTextField(
         value = onOption.value,
         onValueChange = { value: TextFieldValue ->
             val answer = answerHolder.answers[number - 1]
             if (answer is Answer.EnterableAnswer) {
-                onOption.value = value
-                answer.value = value.text
+                if (value.text.isEmpty()) {
+                    onOption.value = TextFieldValue(text = "", TextRange.Zero)
+                    answer.value = null
+                }else {
+                    onOption.value = value
+                    answer.value = value.text
+                }
+            } else if (answer is Answer.NumEnterableAnswer && onlyDigits) {
+                var digit_str = ""
+                var has_dot = false
+                for (i in value.text.indices) {
+                    val ch = value.text[i]
+                    if (ch.isDigit() || (ch == '-' && i == 0)) {
+                        digit_str += ch
+                    } else if (ch == '.') {
+                        if (!has_dot) {
+                            has_dot = true
+                            digit_str += ch
+                        }
+                    }
+                }
+                digit_str.toDoubleOrNull()?.let {
+                    onOption.value = TextFieldValue(text = digit_str, TextRange(digit_str.length))
+                    answer.value = it
+                } ?: if (digit_str.isEmpty() || digit_str == "-" || digit_str == "-.") {
+                    onOption.value = TextFieldValue(text = "", TextRange.Zero)
+                    answer.value = null
+                }
             }
         },
-        modifier = Modifier.width(300.dp), label = { Text("answer") },
+        modifier = Modifier.width(300.dp), label = { Text("answer") }
     )
 }
 
@@ -126,12 +163,18 @@ private fun Variant(onOption: MutableState<String>, answerHolder: AnswerHolder, 
 
 @Composable
 private fun SendButton(answerHolder: AnswerHolder, testId: String) {
+    val warningMessage = remember { mutableStateOf("") }
     Row(horizontalArrangement = Arrangement.End, modifier = Modifier.width(RatiosHelper.getMainContentWidth().dp)) {
+        Text(warningMessage.value, color = Color.Red, modifier = Modifier.padding(top = 15.dp, end = 20.dp))
         Button(onClick = {
-            print("AnswerFinal: "); answerHolder.answers.forEach { print("${it.value}, ") }.let { println() }
-            sendAnswer(answerHolder.answers, testId)
-            backToFeed()
-                         }, modifier = Modifier.align(Alignment.Top), colors = ColorsHelper.CLEAN_BUTTON_COLORS) {
+                print("AnswerFinal: "); answerHolder.answers.forEach { print("${it.value}, ") }.let { println() }
+                if (answerHolder.answers.any { it.value == null }) {
+                    warningMessage.value = "Some question hasn't been answered!"
+                } else {
+                    sendAnswer(answerHolder.answers, testId)
+                    backToFeed()
+                }
+            }, modifier = Modifier.align(Alignment.Top), colors = ColorsHelper.CLEAN_BUTTON_COLORS) {
             Text("Send")
         }
     }

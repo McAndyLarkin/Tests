@@ -20,6 +20,7 @@ class AnswerHolder private constructor(val answers: MutableList<Answer<*>>) {
             is Question.Type.BINARY -> Answer.BinaryAnswer()
             is Question.Type.ENTERABLE -> Answer.EnterableAnswer()
             is Question.Type.VARIANTS -> Answer.VariantsAnswer()
+            is Question.Type.NUM_ENTERABLE -> Answer.NumEnterableAnswer()
         }
     }
 }

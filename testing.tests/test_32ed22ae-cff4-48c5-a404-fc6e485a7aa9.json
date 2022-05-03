@@ -31,9 +31,17 @@
         "variants": [
           "Russia",
           "USA",
-          "England",
-          "Ukraine"
+          "UK",
+          "USSR"
         ]
+      }
+    },
+    {
+      "number": 4,
+      "title": "Your weight:",
+      "type": {
+        "name": "NUM_ENTERABLE",
+        "rightAnswer": "null"
       }
     }
   ],

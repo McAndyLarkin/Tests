@@ -1,9 +1,12 @@
 package actions
 
-import ui.PageType
 import androidx.compose.runtime.MutableState
 import data.delivering.FilesResolver
 import repositories.SingletonCenter
+import ui.PageType
+import java.awt.Desktop
+import java.net.URI
+
 
 class ActionManager(private val contentState: MutableState<PageType>) {
     fun send(action: Action) {
@@ -35,6 +38,16 @@ class ActionManager(private val contentState: MutableState<PageType>) {
 
     private fun openWeb(link: String) {
         println("Open web: $link")
+        val desktop = if (Desktop.isDesktopSupported()) Desktop.getDesktop() else null
+        desktop?.let {
+            if (desktop.isSupported(Desktop.Action.BROWSE)) {
+                try {
+                    desktop.browse(URI(link))
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }
+        }
     }
 
     private fun onNewTest(path: String) {

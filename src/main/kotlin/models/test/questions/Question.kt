@@ -36,6 +36,14 @@ data class Question(
             }
         }
 
+        class NUM_ENTERABLE : Type<Double>(null){
+            override fun toString(): String {
+                return "NUM_ENTERABLE() : ${super.toString()}"
+            }
+        }
+
+
+
         override fun equals(other: Any?): Boolean {
             return other is Type<*> && rightAnswer == other.rightAnswer
         }

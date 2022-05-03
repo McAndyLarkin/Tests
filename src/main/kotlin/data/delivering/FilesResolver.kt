@@ -117,6 +117,9 @@ object FilesResolver {
             Question.Type.ENTERABLE::class.java.simpleName -> {
                 Question.Type.ENTERABLE()
             }
+            Question.Type.NUM_ENTERABLE::class.java.simpleName -> {
+                Question.Type.NUM_ENTERABLE()
+            }
             else -> {
                 val rightAnswer = typeObj["rightAnswer"]
                 throw ParseException(ERROR_UNEXPECTED_TOKEN)

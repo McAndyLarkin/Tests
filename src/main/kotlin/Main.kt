@@ -88,6 +88,7 @@ private fun MainContent() {
         PageType.LOGIN -> LoginPage()
         PageType.ADMIN -> AdminPage(theWindow.value)
         PageType.ANSWERS -> AnswersPage()
+        PageType.INFO -> InfoPage()
     }
 }
 
@@ -102,7 +103,7 @@ private fun SideBar() {
             alpha = .2f
         )
         Column (Modifier.padding(10.dp)) {
-            Text("123")
+            Text("Some navigation specification", softWrap = true)
             Button(onClick = {
                 if (SingletonCenter.authRepository.user == User.Companion.ADMIN) {
                     actionManager.send(Action.UI.OPEN_PAGE(PageType.ADMIN))
