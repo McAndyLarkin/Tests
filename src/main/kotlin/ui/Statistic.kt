@@ -18,7 +18,7 @@ import org.jetbrains.skia.Font
 import org.jetbrains.skia.Paint
 import org.jetbrains.skia.TextLine
 import org.jetbrains.skia.Typeface
-import repositories.SingletonCenter
+import presenters.SingletonCenter
 import ui.helpers.ColorsHelper
 import ui.helpers.RatiosHelper
 import ui.viewmodels.ticket.getAnswerVal
@@ -29,16 +29,16 @@ const val columns = 5
 @Composable
 fun StatisticPage(testId: String) {
     Column(Modifier.width(RatiosHelper.getMainContentWidth().dp).padding(20.dp)) {
-        SingletonCenter.testRepository.findTestById(testId)?.let { test ->
+        SingletonCenter.testingPresenter.findTestById(testId)?.let { test ->
             Row(Modifier) {
                 Column {
                     Header()
-                    Text("Test: ${test.name}.", fontSize = 22.sp)
+                    Text("Тест: ${test.name}.", fontSize = 22.sp)
                 }
                 CloseButton()
             }
-            SingletonCenter.answerRepository.findAnswersByTestId(testId).let { answerSets ->
-                Text("Total answers: ${answerSets.size}")
+            SingletonCenter.answersPresenter.findAnswersByTestId(testId).let { answerSets ->
+                Text("Всего ответов: ${answerSets.size}")
                 val rows = ceil(test.questions.size / columns.toDouble()).toInt()
                 Column (modifier = Modifier
                     .background(color = Color(.97f,1f, 1f, 1f)).padding(4.dp)
@@ -80,7 +80,7 @@ private fun StatistCeil(question: Question, answers: List<Answer<*>>) {
             val size = DpSize((ceilHeight * 0.4).dp, (ceilHeight * 0.4).dp)
             if (grouped_by_count.size == 1) {
                 Text(
-                    "The only answer provided: ${
+                    "Единственный ответ: ${
                         getAnswerVal(question, grouped_by_count.first().value.first())
                     }", softWrap = true
                 )
@@ -88,14 +88,14 @@ private fun StatistCeil(question: Question, answers: List<Answer<*>>) {
                 val most = grouped_by_count.maxByOrNull { it.value.size }!!
                 val least = grouped_by_count.minByOrNull { it.value.size }!!
                 Text(
-                    "The most popular: ${
+                    "Самый популярный: ${
                         getAnswerVal(question, most.value.first())
-                    }; ${"%.2f".format((most.value.size / answers.size.toDouble()) * 100)}%; ${most.value.size} pcs", softWrap = true
+                    }; ${"%.2f".format((most.value.size / answers.size.toDouble()) * 100)}%; ${most.value.size} раз", softWrap = true
                 )
                 Text(
-                    "The least popular: ${
+                    "Наименее популярный: ${
                         getAnswerVal(question, least.value.first())
-                    }; ${"%.2f".format((least.value.size / answers.size.toDouble()) * 100)}%; ${least.value.size} pcs", softWrap = true
+                    }; ${"%.2f".format((least.value.size / answers.size.toDouble()) * 100)}%; ${least.value.size} раз", softWrap = true
                 )
                 Spacer(modifier = Modifier.height(25.dp))
                 drawPlot(grouped_by_count.map { Pair(getAnswerVal(question, it.value.first()), it.value.size.toDouble()) }, size = size, true)
@@ -104,18 +104,18 @@ private fun StatistCeil(question: Question, answers: List<Answer<*>>) {
                 val least = grouped_by_count.minByOrNull { it.value.size }!!
                 if (most.value.size != least.value.size) {
                     Text(
-                        "Answer '${
+                        "Ответ '${
                             getAnswerVal(question, most.value.first())
-                        }' (${most.value.size} pcs) faces more often than '${
+                        }' (${most.value.size} раз) встречается чаще, чем '${
                             getAnswerVal(question, least.value.first())
-                        }' (${least.value.size} pcs)", softWrap = true
+                        }' (${least.value.size} раз)", softWrap = true
                     )
                     Spacer(modifier = Modifier.height(25.dp))
                     drawDia(grouped_by_count.map { Pair(getAnswerVal(question, it.value.first()), it.value.size.toDouble()) }, size = size)
                 } else {
                     Text(
-                        "Answers '${question.type.positive}' and '${question.type.negative}' " +
-                                "faces the same often (${least.value.size} pcs)", softWrap = true
+                        "Ответы '${question.type.positive}' и '${question.type.negative}' " +
+                                "встречаются одинаково часто: (${least.value.size} раз)", softWrap = true
                     )
                 }
             } else if (question.type is Question.Type.ENTERABLE) {
@@ -123,7 +123,7 @@ private fun StatistCeil(question: Question, answers: List<Answer<*>>) {
                     Text(
                         "* ${
                             getAnswerVal(question, answer.value.first())
-                        }; ${"%.2f".format((answer.value.size / answers.size.toDouble()) * 100)}%; ${answer.value.size} pcs",
+                        }; ${"%.2f".format((answer.value.size / answers.size.toDouble()) * 100)}%; ${answer.value.size} раз",
                         softWrap = true
                     )
                 }
@@ -144,10 +144,10 @@ private fun StatistCeil(question: Question, answers: List<Answer<*>>) {
                     } else null
                 }?.toString()?.let { it.substring(0, it.length.coerceAtMost(8)) }
 
-                Text("The biggest answer: ${max?.value ?: "Undefined"}", softWrap = true)
-                Text("The smallest answer: ${min?.value ?: "Undefined"}", softWrap = true)
-                Text("Average: $average", softWrap = true)
-                Text("Median: ${median ?: "Undefined"}", softWrap = true)
+                Text("Наибольший ответ: ${max?.value ?: "Не определено"}", softWrap = true)
+                Text("Наименьший ответ: ${min?.value ?: "Не определено"}", softWrap = true)
+                Text("Среднее значение: $average", softWrap = true)
+                Text("Медиана: ${median ?: "Undefined"}", softWrap = true)
                 Spacer(modifier = Modifier.height(25.dp))
                 drawPlot(double_answer.map {
                     println("v - ${it.value}")
@@ -155,7 +155,7 @@ private fun StatistCeil(question: Question, answers: List<Answer<*>>) {
                 }, size = size, false)
             }
         } else {
-            Text("There is not answers for the question", softWrap = true)
+            Text("На данный вопрос пока не дано ответов", softWrap = true)
         }
     }
 }
@@ -257,6 +257,6 @@ fun drawDia(grouped: List<Pair<String?, Double>>, size: DpSize) {
 @Composable
 private fun Header() {
     Column(Modifier.padding(bottom = 20.dp)) {
-        Text("Statistic", fontSize = 28.sp, color = ColorsHelper.PASS_TEST_BUTTON)
+        Text("Статистика", fontSize = 28.sp, color = ColorsHelper.PASS_TEST_BUTTON)
     }
 }

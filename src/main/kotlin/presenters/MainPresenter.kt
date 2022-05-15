@@ -1,10 +1,10 @@
-package repositories
+package presenters
 
 import actions.Action
 import models.Entity
 import ui.PageType
 
-class AppRepository {
+class MainPresenter {
     val headerContent: List<Entity> by lazy { listOf(
         Entity("Информация", Action.UI.OPEN_PAGE(PageType.INFO)),
         Entity("Сайт", Action.UI.OPEN_WEB("https://www.nntu.ru")),

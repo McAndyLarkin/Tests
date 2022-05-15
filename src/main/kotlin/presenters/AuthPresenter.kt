@@ -1,4 +1,4 @@
-package repositories
+package presenters
 
 import actionManager
 import actions.Action
@@ -6,7 +6,7 @@ import data.delivering.OwnServerService
 import models.User
 import ui.PageType
 
-class AuthRepository(val dataDeliveringService: OwnServerService) {
+class AuthPresenter(val dataDeliveringService: OwnServerService) {
     var user: User = User.Companion.ANONYMOUS
 
     fun logIn(login: String, password: String) {

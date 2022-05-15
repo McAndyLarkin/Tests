@@ -1,10 +1,10 @@
-package repositories
+package presenters
 
 import data.delivering.OwnServerService
 import models.test.Test
 import models.test.answers.AnswersSet
 
-class AnswerRepository(val dataDeliveringService: OwnServerService) {
+class AnswersPresenter(val dataDeliveringService: OwnServerService) {
 
     fun findAnswerById(testId: String): Test? = null
     fun findAnswersByTestId(testId: String): List<AnswersSet> =

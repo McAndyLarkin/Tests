@@ -14,12 +14,11 @@ import androidx.compose.ui.unit.sp
 import models.User
 import models.test.answers.Answer
 import models.test.questions.Question
-import repositories.SingletonCenter
+import presenters.SingletonCenter
 import ui.CloseButton
 import ui.PageType
 import ui.helpers.ColorsHelper
 import ui.helpers.RatiosHelper
-import kotlin.math.round
 
 @Composable
 fun AnswersPage() {
@@ -31,23 +30,23 @@ fun AnswersPage() {
             Header()
             CloseButton()
         }
-        SingletonCenter.answerRepository.getAnswers()
+        SingletonCenter.answersPresenter.getAnswers()
             .groupBy { it.testId }
             .forEach { ans ->
-                SingletonCenter.testRepository.findTestById(ans.key)?.let { test ->
-                    Text("Test: ${test.name}.", fontSize = 22.sp)
+                SingletonCenter.testingPresenter.findTestById(ans.key)?.let { test ->
+                    Text("Тест: ${test.name}.", fontSize = 22.sp)
                     Button(onClick = {
                         actionManager.send(Action.UI.OPEN_PAGE(PageType.STATISTIC(test.testId)))
                     }, colors = ColorsHelper.CLEAN_BUTTON_COLORS) {
-                        Text("Statistics")
+                        Text("Статистика")
                     }
-                    Text("Answers:")
+                    Text("Ответы:")
                     ans.value.forEach { set ->
                         Text("________________________")
                         if (set.author != User.Companion.ANONYMOUS.userId) {
-                            Text("Author: ${set.author}")
+                            Text("Автор: ${set.author}")
                         } else {
-                            Text("Author: Unknown")
+                            Text("Автор: неизвестен")
                         }
                         for (i in set.answers.indices){
                             val question = test.questions[i]
@@ -67,7 +66,7 @@ fun AnswersPage() {
 @Composable
 private fun Header() {
     Column(Modifier.padding(bottom = 20.dp)) {
-        Text("Answers", fontSize = 28.sp, color = ColorsHelper.PASS_TEST_BUTTON)
+        Text("Ответы", fontSize = 28.sp, color = ColorsHelper.PASS_TEST_BUTTON)
     }
 }
 
@@ -77,13 +76,13 @@ fun getAnswerVal(question: Question, answer: Answer<*>): String =
         answer.value?.let { ans ->
             if (ans) question.type.positive
             else question.type.negative
-        } ?: "Did not answered"
+        } ?: "Нет ответа"
     } else if (question.type is Question.Type.ENTERABLE
         && answer is Answer.EnterableAnswer) {
-        answer.value ?: "Did not answered"
+        answer.value ?: "Нет ответа"
     }else if (question.type is Question.Type.VARIANTS
         && answer is Answer.VariantsAnswer) {
-        answer.value ?: "Did not answered"
+        answer.value ?: "Нет ответа"
     } else if (question.type is Question.Type.NUM_ENTERABLE && answer is Answer.NumEnterableAnswer) {
         answer.value?.toString()?.let { it.substring(0, it.length.coerceAtMost(8)) } ?: "Did not answered"
-    } else "Data destroyed"
+    } else "Данные повреждены"

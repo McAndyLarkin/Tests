@@ -16,7 +16,7 @@ fun InfoPage() {
         .padding(20.dp)
         .verticalScroll(rememberScrollState())) {
         Row(Modifier.fillMaxWidth()) {
-            Text("Some important information may be placed here.")
+            Text("Здесь может быть размещена важная информация.")
             CloseButton()
         }
     }

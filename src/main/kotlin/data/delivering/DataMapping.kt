@@ -22,14 +22,12 @@ fun Test.toMap() = mapOf(
                 "title" to it.title,
                 "type" to mutableMapOf<String, Any>().apply {
                     set("name", it.type::class.java.simpleName)
-                    set("rightAnswer", it.type.rightAnswer ?: "null")
                     when (it.type) {
                         is Question.Type.BINARY -> {
                             set("positive", it.type.positive)
                             set("negative", it.type.negative)
                         }
                         is Question.Type.VARIANTS -> {
-                            set("poly", it.type.poly)
                             set("variants", it.type.variants)
                         }
                     }
@@ -143,7 +141,7 @@ private fun getQuestionTypeFrom(typeObj: JSONObject): Question.Type<*> {
                         }
                     }
                 },
-                typeObj["poly"] as Boolean
+                false
             )
         }
         Question.Type.ENTERABLE::class.java.simpleName -> {
@@ -153,7 +151,6 @@ private fun getQuestionTypeFrom(typeObj: JSONObject): Question.Type<*> {
             Question.Type.NUM_ENTERABLE()
         }
         else -> {
-            val rightAnswer = typeObj["rightAnswer"]
             throw ParseException(ParseException.ERROR_UNEXPECTED_TOKEN)
         }
     }

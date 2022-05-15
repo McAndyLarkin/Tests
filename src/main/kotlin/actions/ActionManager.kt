@@ -2,7 +2,7 @@ package actions
 
 import androidx.compose.runtime.MutableState
 import data.delivering.FilesResolver
-import repositories.SingletonCenter
+import presenters.SingletonCenter
 import ui.PageType
 import java.awt.Desktop
 import java.net.URI
@@ -26,9 +26,9 @@ class ActionManager(private val contentState: MutableState<PageType>) {
     private fun processInternalAction(action: Action.INTERNAL) {
         when(action) {
             is Action.INTERNAL.ON_NEW_TEST -> onNewTest(action.testPath)
-            is Action.INTERNAL.ADD_TEST -> SingletonCenter.testRepository.add(action.test)
-            is Action.INTERNAL.ADD_ANSWER -> SingletonCenter.answerRepository.add(action.answers)
-            is Action.INTERNAL.LOG_IN -> SingletonCenter.authRepository.logIn(action.login, action.password)
+            is Action.INTERNAL.ADD_TEST -> SingletonCenter.testingPresenter.add(action.test)
+            is Action.INTERNAL.ADD_ANSWER -> SingletonCenter.answersPresenter.add(action.answers)
+            is Action.INTERNAL.LOG_IN -> SingletonCenter.authPresenter.logIn(action.login, action.password)
         }
     }
 

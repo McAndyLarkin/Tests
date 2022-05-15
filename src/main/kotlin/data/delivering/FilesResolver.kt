@@ -111,7 +111,7 @@ object FilesResolver {
                             }
                         }
                     },
-                    typeObj["poly"] as Boolean
+                    false
                 )
             }
             Question.Type.ENTERABLE::class.java.simpleName -> {
@@ -121,7 +121,6 @@ object FilesResolver {
                 Question.Type.NUM_ENTERABLE()
             }
             else -> {
-                val rightAnswer = typeObj["rightAnswer"]
                 throw ParseException(ERROR_UNEXPECTED_TOKEN)
             }
         }
@@ -130,14 +129,12 @@ object FilesResolver {
     private fun getJSONObjectFrom(type: Question.Type<*>): JSONObject {
         val typeObj = JSONObject()
         typeObj["name"] = type::class.java.simpleName
-        typeObj["rightAnswer"] = type.rightAnswer
         when (type) {
             is Question.Type.BINARY -> {
                 typeObj["positive"] = type.positive
                 typeObj["negative"] = type.negative
             }
             is Question.Type.VARIANTS -> {
-                typeObj["poly"] = type.poly.toString()
                 typeObj["variants"] = JSONArray().apply {
                     type.variants.forEach(this::add)
                 }

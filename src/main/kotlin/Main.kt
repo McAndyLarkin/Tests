@@ -28,7 +28,7 @@ import androidx.compose.ui.window.WindowState
 import androidx.compose.ui.window.application
 import localization.LocalizedStrings
 import models.User
-import repositories.SingletonCenter
+import presenters.SingletonCenter
 import ui.*
 import ui.helpers.ColorsHelper
 import ui.helpers.RatiosHelper
@@ -103,15 +103,15 @@ private fun SideBar() {
             alpha = .2f
         )
         Column (Modifier.padding(10.dp)) {
-            Text("Some navigation specification", softWrap = true)
+            Text("Некоторые указания и информация", softWrap = true)
             Button(onClick = {
-                if (SingletonCenter.authRepository.user == User.Companion.ADMIN) {
+                if (SingletonCenter.authPresenter.user == User.Companion.ADMIN) {
                     actionManager.send(Action.UI.OPEN_PAGE(PageType.ADMIN))
                 } else {
                     actionManager.send(Action.UI.OPEN_PAGE(PageType.LOGIN))
                 }
             }) {
-                Text("Admin")
+                Text("Войти как администратор")
             }
         }
     }
@@ -172,9 +172,9 @@ private fun HeaderBar() {
                     }.background(color = Color(1f, 1f, 1f, .7f))
                 ) {
                     Column(Modifier.padding(20.dp)) {
-                        SingletonCenter.appRepository.headerContent.let { lines ->
+                        SingletonCenter.mainPresenter.headerContent.let { lines ->
                             for (index in lines.indices) {
-                                SingletonCenter.appRepository.headerContent
+                                SingletonCenter.mainPresenter.headerContent
                                 val color = remember{mutableStateOf(ColorsHelper.HEADER_LINES)}
                                 Text(lines[index].title, Modifier.offset(x = 30.dp + (index * 40).dp).let { mod ->
                                     lines[index].action?.let {

@@ -22,10 +22,10 @@ fun AdminPage(window: ComposeWindow) {
             CloseButton()
         }
         Button(onClick = { addTestDialog(window) }, modifier = Modifier.padding(bottom = 20.dp)) {
-            Text("Add Tests")
+            Text("Добавить новый тест")
         }
         Button(onClick = { actionManager.send(Action.UI.OPEN_PAGE(page = PageType.ANSWERS)) } ) {
-            Text("Answers")
+            Text("Обзор ответов")
         }
     }
 }
@@ -33,12 +33,12 @@ fun AdminPage(window: ComposeWindow) {
 @Composable
 private fun Header() {
     Column(Modifier.padding(bottom = 20.dp)) {
-        Text("Admin panel", fontSize = 28.sp, color = ColorsHelper.PASS_TEST_BUTTON)
+        Text("Панель администратора", fontSize = 28.sp, color = ColorsHelper.PASS_TEST_BUTTON)
     }
 }
 
 private fun addTestDialog(window: ComposeWindow) {
-    val file = FileDialog(window, "Select new Test", FileDialog.LOAD).apply {
+    val file = FileDialog(window, "Выберите тест", FileDialog.LOAD).apply {
         isVisible = true
         isMultipleMode = false
 //        val fileExt = "*.json"

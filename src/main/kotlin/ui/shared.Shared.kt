@@ -27,7 +27,7 @@ fun backToFeed() {
 fun CloseButton() {
     Row(horizontalArrangement = Arrangement.End, modifier = Modifier.width(RatiosHelper.getMainContentWidth().dp)) {
         Button(onClick = ::backToFeed, modifier = Modifier.align(Alignment.Top).size(50.dp), colors = ColorsHelper.CLEAN_BUTTON_COLORS) {
-            Image(painter = painterResource("img1.png"), "Close")
+            Image(painter = painterResource("img1.png"), "Закрыть")
         }
     }
 }

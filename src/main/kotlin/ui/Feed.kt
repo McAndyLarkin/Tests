@@ -18,7 +18,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ui.viewmodels.ticket.TicketTopic
-import repositories.SingletonCenter
+import presenters.SingletonCenter
 import ui.helpers.ColorsHelper
 import ui.helpers.RatiosHelper
 import ui.helpers.UIUtils
@@ -36,7 +36,7 @@ fun FeedPage() {
             .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally){
 
-            SingletonCenter.testRepository.getTests().also(::println)
+            SingletonCenter.testingPresenter.getTests().also(::println)
                 .map(TicketMapper::fromTest).let { content ->
                 for (topic in content) {
                     Ticket(topic)

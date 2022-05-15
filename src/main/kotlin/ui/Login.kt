@@ -27,7 +27,7 @@ fun LoginPage() {
                     onLoginValue.value = value
                 },
                 modifier = Modifier.width(300.dp),
-                label = { Text("Admin Login") },
+                label = { Text("Логин администратора") },
             )
             OutlinedTextField(
                 value = onPasswordValue.value,
@@ -35,7 +35,7 @@ fun LoginPage() {
                     onPasswordValue.value = value
                 },
                 modifier = Modifier.width(300.dp),
-                label = { Text("Admin Password") },
+                label = { Text("Пароль") },
             )
             Button(onClick = {
                 actionManager.send(
@@ -45,7 +45,7 @@ fun LoginPage() {
                     )
                 )
             }) {
-                Text("LogIn")
+                Text("Войти")
             }
         }
         CloseButton()
